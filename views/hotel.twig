@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hotel Reservation</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h1>Hotel Reservation</h1>
+
+    <form id="reservationForm">
+        <label for="hotelId">Hotel ID:</label>
+        <input type="text" id="hotelId" name="hotelId" required>
+
+        <label for="chambreId">Chambre ID:</label>
+        <input type="text" id="chambreId" name="chambreId" required>
+
+        <button type="submit">Reserver</button>
+    </form>
+
+    <button id="displayChambres">Afficher Chambres</button>
+
+    <div id="chambresList"></div>
+
+    <script>
+        // Ask for the user's name when the page loads
+        const userName = prompt("Veuillez entrer votre nom", "");
+
+        // Configure socket.io
+        const socket = io();
+
+        // Listen for the form submission event
+        document.getElementById('reservationForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Emit a 'reserve' event with the form data
+            socket.emit('reserve', {
+                hotelId: document.getElementById('hotelId').value,
+                chambreId: document.getElementById('chambreId').value,
+                userName: userName
+            });
+        });
+
+        // Listen for the click event on the 'displayChambres' button
+        document.getElementById('displayChambres').addEventListener('click', function() {
+            // Emit a 'displayChambres' event
+            socket.emit('displayChambres', {hotelId: document.getElementById('hotelId').value});
+        });
+
+        // Listen for the 'displayChambres' event
+socket.on('displayChambres', function(chambres) {
+    // Display the chambres
+    const chambresList = document.getElementById('chambresList');
+    chambresList.innerHTML = '';
+    chambres.forEach(function(chambre) {
+        const li = document.createElement('li');
+        li.textContent = `Numero: ${chambre.numero}, Hotel: ${chambre.hotel}, Reservee: ${chambre.reservee}, Nom Client: ${chambre.nom_client}`;
+        chambresList.appendChild(li);
+    });
+});
+    </script>
+</body>
+</html>
